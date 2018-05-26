@@ -4,9 +4,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 let ParseError = require('./errors');
 let FatalError = require('./errors');
 let debug = require('debug');
-let request = require('request');
+let request = require('request-promise');
+
+
 
 exports.ApiClient = class ApiClient {
+
+  constructor(options = {}) {
+    this.options = Object.assign({
+      baseApiUrl : 'http://gbapi.changiomemuoi.com/api'
+    }, options);
+  }
+
   /**
    * Generates url with bot token and provided path/method you want to be got/executed by bot
    * @param  {String} path
@@ -30,7 +39,7 @@ exports.ApiClient = class ApiClient {
     }
   }
 
-  _request(endpoint, options = {}) {
+  callApi(endpoint, options = {}, cb) {
 
     if (this.options.request) {
       Object.assign(options, this.options.request);
@@ -43,13 +52,14 @@ exports.ApiClient = class ApiClient {
       this._fixReplyMarkup(options.qs);
     }
 
-    options.method = 'POST';
-    options.url = this._buildURL(_path);
+    options.method = 'GET';
+    options.uri = this._buildURL(endpoint);
     options.simple = false;
     options.resolveWithFullResponse = true;
     options.forever = true;
+    // options.json = true;
     debug('HTTP request: %j', options);
-    return request(options)
+    request(options)
       .then(resp => {
         let data;
         try {
@@ -57,14 +67,10 @@ exports.ApiClient = class ApiClient {
         } catch (err) {
           throw new ParseError(`Error parsing response: ${resp.body}`, resp);
         }
+        cb(data);
 
-        if (data.ok) {
-          return data.result;
-        }
       }).catch(error => {
-        // TODO: why can't we do `error instanceof errors.BaseError`?
-        if (error.response) throw error;
-        throw new FatalError(error);
+        throw error;
       });
   }
 };
