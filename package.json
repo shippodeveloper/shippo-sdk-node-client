@@ -20,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/shippodeveloper/shippo-sdk-node-client/issues"
   },
-  "homepage": "https://github.com/shippodeveloper/shippo-sdk-node-client#readme"
+  "homepage": "https://github.com/shippodeveloper/shippo-sdk-node-client#readme",
+  "devDependencies": {
+    "debug": "^3.1.0"
+  },
+  "dependencies": {
+    "request": "^2.87.0"
+  }
 }
